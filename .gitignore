@@ -2,3 +2,4 @@
 *~
 _pycache
 .DS_Store_
+*.db

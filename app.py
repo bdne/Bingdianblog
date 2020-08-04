@@ -1,8 +1,39 @@
 from flask import Flask
+import sys
 from flask_bootstrap import Bootstrap
 from flask import url_for
+from flask_sqlalchemy import SQLAlchemy
+import os
 app = Flask(__name__)
+WIN = sys.platform.startswith('win')
+if WIN: # 如果是 Windows 系统，使用三个斜线
+    prefix = 'sqlite:///'
+else: # 否则使用四个斜线
+    prefix = 'sqlite:////'
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = prefix + os.path.join(app.root_path, 'data.db')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # 关闭对模型修改的监控
+# 在扩展类实例化前加载配置
+db = SQLAlchemy(app)
 bootstrap = Bootstrap(app)
+class User(db.Model):
+    id=db.Column(db.Integer,primary_key=True)
+    name=db.Column(db.String(20))
+class Movie(db.Model): # 表名将会是 movie
+    id = db.Column(db.Integer, primary_key=True) # 主键
+    title = db.Column(db.String(60)) # 电影标题
+    year = db.Column(db.String(4)) # 电影年份
+#404跳转页面
+@app.errorhandler(404) # 传入要处理的错误代码
+def page_not_found(e): # 接受异常对象作为参数
+    user = User.query.first()
+    return render_template('404.html'), 404 # 返回模板和状态码
+#上下文处理函数
+@app.context_processor
+def inject_user():  # 函数名可以随意修改
+    user = User.query.first()
+    return dict(user=user)  # 需要返回字典，等同于 return {'user': user}
+
 name='Bingdian'
 movies = [
         {'title': 'My Neighbor Totoro', 'year': '1988'},
@@ -14,8 +45,7 @@ movies = [
         {'title': 'King of Comedy', 'year': '1999'},
         {'title': 'Devils on the Doorstep', 'year': '1999'},
         {'title': 'WALL-E', 'year': '2008'},
-        {'title': 'The Pork of Music', 'year': '2012'},
-    ]
+        {'title': 'The Pork of Music', 'year': '2012'}]
 from flask import Flask,render_template
 @app.route('/')
 def index():
