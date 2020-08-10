@@ -4,6 +4,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_bootstrap import Bootstrap
+from flask_moment import Moment
 
 # SQLite URI compatible
 WIN = sys.platform.startswith('win')
@@ -18,6 +19,7 @@ app.config['SECRET_KEY'] = 'dev'  # 等同于 app.secret_key = 'dev'
 # 在扩展类实例化前加载配置
 db = SQLAlchemy(app)
 bootstrap = Bootstrap(app)
+moment = Moment(app)
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'#重定向到登陆界面，需要是登录函数的名字

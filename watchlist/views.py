@@ -1,7 +1,8 @@
 from flask import render_template, request, url_for, redirect, flash
 from flask_login import login_user, login_required, logout_user, current_user
 from watchlist import app, db
-from watchlist.models import User, Movie
+from watchlist.forms import HelloForm#表单
+from watchlist.models import User, Movie,Message
 
 @app.route('/',methods=['GET','POST'])
 def index():
@@ -112,4 +113,19 @@ def settings():
         return redirect(url_for('index'))
     
     return render_template('setting.html')
+#留言板
+@app.route('/message', methods=['GET', 'POST'])
+def message():
+    form = HelloForm()
+    if form.validate_on_submit():
+        name = form.name.data
+        body = form.body.data
+        message = Message(body=body, name=name)
+        db.session.add(message)
+        db.session.commit()
+        flash('Your message have been sent to the world!')
+        return redirect(url_for('message'))
+
+    messages = Message.query.order_by(Message.timestamp.desc()).all()
+    return render_template('message.html', form=form, messages=messages)
 
